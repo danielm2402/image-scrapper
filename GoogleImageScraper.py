@@ -57,6 +57,7 @@ class GoogleImageScraper():
                     continue
             except Exception as e:
                 #update chromedriver
+
                 pattern = '(\d+\.\d+\.\d+\.\d+)'
                 version = list(set(re.findall(pattern, str(e))))[0]
                 is_patched = patch.download_lastest_chromedriver(version)
@@ -68,7 +69,7 @@ class GoogleImageScraper():
         self.number_of_images = number_of_images
         self.webdriver_path = webdriver_path
         self.image_path = image_path
-        self.url = "https://www.google.com/search?q=%s&source=lnms&tbm=isch&sa=X&ved=2ahUKEwie44_AnqLpAhUhBWMBHUFGD90Q_AUoAXoECBUQAw&biw=1920&bih=947"%(search_key)
+        self.url = "https://www.google.com/search?q=dog&tbm=isch&ved=2ahUKEwiMrKzyo7SEAxX_A2IAHSjaATAQ2-cCegQIABAA&oq=dog&gs_lp=EgNpbWciA2RvZzINEAAYgAQYigUYQxixAzINEAAYgAQYigUYQxixAzIKEAAYgAQYigUYQzINEAAYgAQYigUYQxixAzIKEAAYgAQYigUYQzIKEAAYgAQYigUYQzIKEAAYgAQYigUYQzIKEAAYgAQYigUYQzIKEAAYgAQYigUYQzIKEAAYgAQYigUYQ0jMB1DIA1jIBnAAeACQAQCYAYsBoAGTA6oBAzAuM7gBA8gBAPgBAYoCC2d3cy13aXotaW1nwgIEECMYJ8ICEBAAGIAEGIoFGEMYsQMYgwGIBgE&sclient=img&ei=M6bRZczGLf-HiLMPqLSHgAM&bih=708&biw=1440&hl=es"
         self.headless=headless
         self.min_resolution = min_resolution
         self.max_resolution = max_resolution
@@ -87,71 +88,21 @@ class GoogleImageScraper():
         image_urls=[]
         count = 0
         missed_count = 0
-        indx_1 = 0
+        indx = 0
         indx_2 = 0
         search_string = '//*[@id="islrg"]/div[1]/div[%s]/a[1]/div[1]/img'
         time.sleep(3)
-        while self.number_of_images > count and missed_count < self.max_missed:
-            if indx_2 > 0:
-                try:
-                    imgurl = self.driver.find_element(By.XPATH, search_string%(indx_1,indx_2+1))
-                    imgurl.click()
-                    indx_2 = indx_2 + 1
-                    missed_count = 0
-                except Exception:
-                    try:
-                        imgurl = self.driver.find_element(By.XPATH, search_string%(indx_1+1,1))
-                        imgurl.click()
-                        indx_2 = 1
-                        indx_1 = indx_1 + 1
-                    except:
-                        indx_2 = indx_2 + 1
-                        missed_count = missed_count + 1
-            else:
-                try:
-                    imgurl = self.driver.find_element(By.XPATH, search_string%(indx_1+1))
-                    imgurl.click()
-                    missed_count = 0
-                    indx_1 = indx_1 + 1    
-                except Exception:
-                    try:
-                        imgurl = self.driver.find_element(By.XPATH, '//*[@id="islrg"]/div[1]/div[%s]/div[%s]/a[1]/div[1]/img'%(indx_1,indx_2+1))
-                        imgurl.click()
-                        missed_count = 0
-                        indx_2 = indx_2 + 1
-                        search_string = '//*[@id="islrg"]/div[1]/div[%s]/div[%s]/a[1]/div[1]/img'
-                    except Exception:
-                        indx_1 = indx_1 + 1
-                        missed_count = missed_count + 1
-                    
-            try:
-                #select image from the popup
-                time.sleep(1)
-                class_names = ["n3VNCb","iPVvYb","r48jcc","pT0Scc"]
-                images = [self.driver.find_elements(By.CLASS_NAME, class_name) for class_name in class_names if len(self.driver.find_elements(By.CLASS_NAME, class_name)) != 0 ][0]
-                for image in images:
-                    #only download images that starts with http
-                    src_link = image.get_attribute("src")
-                    if(("http" in src_link) and (not "encrypted" in src_link)):
-                        print(
-                            f"[INFO] {self.search_key} \t #{count} \t {src_link}")
-                        image_urls.append(src_link)
-                        count +=1
-                        break
-            except Exception:
-                print("[INFO] Unable to get link")
-
-            try:
-                #scroll page to load next image
-                if(count%3==0):
-                    self.driver.execute_script("window.scrollTo(0, "+str(indx_1*60)+");")
-                element = self.driver.find_element(By.CLASS_NAME,"mye4qd")
-                element.click()
-                print("[INFO] Loading next page")
-                time.sleep(3)
-            except Exception:
-                time.sleep(1)
-
+        while self.number_of_images > count:
+            print('HOLA')
+            time.sleep(3)
+            li_element= self.driver.find_element_by_xpath(f"//div[@data-ri='{indx}']")
+            li_element.click()
+            time.sleep(2)
+            img = self.driver.find_element_by_xpath('//*[@id="Sva75c"]/div[2]/div[2]/div[2]/div[2]/c-wiz/div/div/div/div/div[3]/div[1]/a/img[1]')
+            href_attribute = img.get_attribute("src")
+            print(href_attribute, img, indx)
+            indx = indx +1
+            #self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
 
 
         self.driver.quit()

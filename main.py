@@ -9,6 +9,7 @@ Created on Sun Jul 12 11:02:06 2020
 import os
 import concurrent.futures
 from GoogleImageScraper import GoogleImageScraper
+from BingImageScrapper import BingImageScraper
 from patch import webdriver_executable
 
 
@@ -31,22 +32,27 @@ def worker_thread(search_key):
 if __name__ == "__main__":
     #Define file path
     webdriver_path = os.path.normpath(os.path.join(os.getcwd(), 'webdriver', webdriver_executable()))
+    print(webdriver_path, 'PATH')
     image_path = os.path.normpath(os.path.join(os.getcwd(), 'photos'))
 
     #Add new search key into array ["cat","t-shirt","apple","orange","pear","fish"]
-    search_keys = list(set(["cat","t-shirt"]))
+    search_keys = list(set(["atlanta hawks fans"]))
 
     #Parameters
-    number_of_images = 5                # Desired number of images
-    headless = True                     # True = No Chrome GUI
+    number_of_images = 1            # Desired number of images
+    headless = False                     # True = No Chrome GUI
     min_resolution = (0, 0)             # Minimum desired image resolution
     max_resolution = (9999, 9999)       # Maximum desired image resolution
-    max_missed = 10                     # Max number of failed images before exit
-    number_of_workers = 1               # Number of "workers" used
+    max_missed = 2                     # Max number of failed images before exit
+    number_of_workers = 2               # Number of "workers" used
     keep_filenames = False              # Keep original URL image filenames
 
-    #Run each search_key in a separate thread
-    #Automatically waits for all threads to finish
-    #Removes duplicate strings from search_keys
-    with concurrent.futures.ThreadPoolExecutor(max_workers=number_of_workers) as executor:
-        executor.map(worker_thread, search_keys)
+    for search_key in search_keys:
+        image_scrapper = GoogleImageScraper(webdriver_path, image_path, search_key, number_of_images, headless,
+                                      min_resolution, max_resolution)
+        image_urls = image_scrapper.find_image_urls()
+        image_scrapper.save_images(image_urls)
+
+
+    #with concurrent.futures.ThreadPoolExecutor(max_workers=number_of_workers) as executor:
+     #   executor.map(worker_thread, search_keys)

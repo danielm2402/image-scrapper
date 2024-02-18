@@ -94,6 +94,7 @@ def download_lastest_chromedriver(current_chrome_version=""):
         result = True
     except Exception as e:
         print(e)
+        print()
         print("[WARN] unable to download lastest chromedriver. the system will use the local version instead.")
     
     return result
